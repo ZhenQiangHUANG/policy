@@ -198,4 +198,21 @@
          WHERE username=#{username}
          AND delete_status='1';
     </select>
+
+    <select id="getLastCheckAnnotationTime" resultType="com.alibaba.fastjson.JSONObject">
+        select
+                view_anno               lastViewTime
+        from sys_user
+        WHERE nickname=#{username}
+        AND delete_status='1';
+    </select>
+
+    <update id="updateLastCheckAnnotationTime">
+        UPDATE sys_user
+        SET
+            view_anno = now()
+        WHERE username=#{username}
+        AND delete_status='1';
+    </update>
+
 </mapper>

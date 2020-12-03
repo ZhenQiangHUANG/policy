@@ -14,6 +14,7 @@ export const constantRouterMap = [
     component: Layout,
     redirect: '/dashboard',
     name: '首页',
+    meta: {title: '首页'},
     hidden: true,
     children: [{
       path: 'dashboard', component: _import('dashboard/index')
@@ -29,17 +30,76 @@ export const asyncRouterMap = [
   {
     path: '/system',
     component: Layout,
-    redirect: '/system/article',
-    name: '功能模块',
-    meta: {title: '功能模块', icon: 'tree'},
+    redirect: '/system/',
+    name: '',
+    meta: {title: '政策研究', icon: 'tree'},
     children: [
       {
-        path: 'article',
-        name: '文章',
-        component: _import('article/article'),
-        meta: {title: '文章', icon: 'example'},
-        menu: 'article'
+        path: 'policy',
+        name: '政策详情',
+        component: _import('policy/policy'),
+        meta: {title: '政策详情', icon: 'form'},
+        menu: 'policy'
       },
+      {
+        path: 'annotation',
+        name: '批注详情',
+        component: _import('policy/annotation'),
+        meta: {title: '批注详情', icon: 'form'},
+        menu: 'policy'
+      },
+    ]
+  },
+  {
+    path: '/statistics',
+    component: Layout,
+    redirect: '/statistics/',
+    name: '',
+    meta: {title: '数据统计', icon: 'table'},
+    menu: 'statistics',
+    children: [
+      {
+        path: 'numChartPie', 
+        name: '数量统计', 
+        component: _import('statistics/numChartPie'), 
+        meta: {title: '数量统计', icon: 'form'}, 
+        menu: 'statistics'
+      },
+      {
+        path: 'revenueChartPie', 
+        name: '创收统计', 
+        component: _import('statistics/revenueChartPie'), 
+        meta: {title: '创收统计', icon: 'form'}, 
+        menu: 'statistics'
+      }
+      /*{
+        path: 'numChartMonthLine', 
+        name: '数量月对比', 
+        component: _import('statistics/numChartMonthLine'), 
+        meta: {title: '数量月对比', icon: 'form'}, 
+        menu: 'statistics'
+      },
+      {
+        path: 'revenueChartMonthLine', 
+        name: '创收月对比', 
+        component: _import('statistics/revenueChartMonthLine'), 
+        meta: {title: '创收月对比', icon: 'form'}, 
+        menu: 'statistics'
+      },
+      {
+        path: 'numChartYearLine', 
+        name: '数量年对比', 
+        component: _import('statistics/numChartYearLine'), 
+        meta: {title: '数量年对比', icon: 'form'}, 
+        menu: 'statistics'
+      },
+      {
+        path: 'revenueChartYearLine', 
+        name: '创收年对比', 
+        component: _import('statistics/revenueChartYearLine'), 
+        meta: {title: '创收年对比', icon: 'form'}, 
+        menu: 'statistics'
+      }*/
     ]
   },
   {

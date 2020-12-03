@@ -10,6 +10,15 @@ import '@/icons' // icon
 import '@/permission' // 权限
 import {default as api} from './utils/api'
 import {hasPermission} from "./utils/hasPermission";
+import echarts from 'echarts'// 引入echarts
+
+import JsonExcel from 'vue-json-excel'//引入Excel带出所需组件
+import Blob from './vendor/Blob.js'
+import Export2Excel from './vendor/Export2Excel.js'
+
+Vue.component('downloadExcel', JsonExcel)
+
+Vue.prototype.$echarts = echarts 
 Vue.use(ElementUI, {locale})
 Vue.prototype.api = api
 //全局的常量

@@ -5,9 +5,9 @@
 
     <insert id="addArticle" parameterType="com.alibaba.fastjson.JSONObject">
         INSERT INTO article
-            (content)
+            (title,url,content)
         VALUES
-            (#{content})
+            (#{title},#{url},#{content})
     </insert>
 
     <select id="countArticle" resultType="Integer">
@@ -19,6 +19,8 @@
     <select id="listArticle" resultType="com.alibaba.fastjson.JSONObject">
         SELECT
             w.id                                      id,
+            w.title                                   title,
+            w.url                                     url,
             w.content                                 content,
             date_format(w.create_time, '%Y.%m.%d %T') createTime
         FROM article w
@@ -30,6 +32,8 @@
     <update id="updateArticle" parameterType="com.alibaba.fastjson.JSONObject">
         UPDATE article
         SET
+            title = #{title},
+            url = #{url},
             content = #{content}
         WHERE id = #{id}
     </update>

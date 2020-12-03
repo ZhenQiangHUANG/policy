@@ -36,6 +36,7 @@ public class ArticleController {
 	@RequiresPermissions("article:add")
 	@PostMapping("/addArticle")
 	public JSONObject addArticle(@RequestBody JSONObject requestJson) {
+		//验证是否含有全部必填字段
 		CommonUtil.hasAllRequired(requestJson, "content");
 		return articleService.addArticle(requestJson);
 	}

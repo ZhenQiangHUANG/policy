@@ -90,4 +90,22 @@ public interface UserDao {
 	 * 删除本角色全部权限
 	 */
 	int removeRoleAllPermission(JSONObject jsonObject);
+
+	/** 
+	 * @description: 查询当前用户上一次查看批注的时间
+	 * @param:  * @param requestJson 
+	 * @return: com.alibaba.fastjson.JSONObject 
+	 * @author Huangzhenqiang
+	 * @date: 2020/11/18 16:41
+	 */
+	JSONObject getLastCheckAnnotationTime(JSONObject requestJson);
+
+	/** 
+	 * @description: 更新当前用户查看批注的时间 
+	 * @param:  * @param requestJson 
+	 * @return: com.alibaba.fastjson.JSONObject 
+	 * @author Huangzhenqiang
+	 * @date: 2020/11/19 11:02
+	 */
+	void updateLastCheckAnnotationTime(JSONObject requestJson);
 }

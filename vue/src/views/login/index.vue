@@ -3,7 +3,7 @@
     <el-form autoComplete="on" :model="loginForm" :rules="loginRules" ref="loginForm" label-position="left"
              label-width="0px"
              class="card-box login-form">
-      <h3 class="title">后台管理系统</h3>
+      <h3 class="title">欢乐谷集团政府优惠政策应用管理系统</h3>
       <el-form-item prop="username">
         <span class="svg-container svg-container_login">
           <svg-icon icon-class="user"/>
@@ -16,7 +16,8 @@
         </span>
         <el-input type="password" @keyup.enter.native="handleLogin" v-model="loginForm.password"
                   autoComplete="on"></el-input>
-      </el-form-item>
+      </el-form-item>        
+      <el-checkbox v-model="checked" style="margin:0px 0px 10px 100px">记住密码</el-checkbox>   
       <el-form-item>
         <el-button type="primary" style="width:100%;" :loading="loading" @click.native.prevent="handleLogin">
           登录
@@ -31,15 +32,19 @@
     data() {
       return {
         loginForm: {
-          username: 'admin',
-          password: '123456'
+          username: '',
+          password: ''
         },
         loginRules: {
           username: [{required: true, trigger: 'blur', message: "请输入用户名"}],
           password: [{required: true, trigger: 'blur', message: "请输入密码"}]
         },
+        checked: true,
         loading: false
       }
+    },
+    mounted() {
+        this.getCookie();
     },
     methods: {
       handleLogin() {
@@ -49,6 +54,14 @@
             this.$store.dispatch('Login', this.loginForm).then(data => {
               this.loading = false
               if ("success" === data.result) {
+                
+                if(this.checked == true) {
+                  //传入账号名，密码，和保存天数3个参数
+                  this.setCookie(this.loginForm.username, this.loginForm.password, 10*365);
+                } else {
+                  //清空Cookie
+                  this.clearCookie();
+                }
                 this.$router.push({path: '/'})
               } else {
                 this.$message.error("账号/密码错误");
@@ -60,6 +73,33 @@
             return false
           }
         })
+      },
+      setCookie(c_name, c_pwd, exdays) {
+        var exdate = new Date(); //获取时间
+        exdate.setTime(exdate.getTime() + 24 * 60 * 60 * 1000 * exdays); //保存的天数
+        //字符串拼接cookie
+        window.document.cookie = "policyUserName" + "=" + c_name + ";path=/;expires=" + exdate.toGMTString();
+        window.document.cookie = "policyUserPwd" + "=" + c_pwd + ";path=/;expires=" + exdate.toGMTString();
+      },
+      getCookie: function() {
+        if (document.cookie.length > 0) {
+          var arr = document.cookie.split('; '); //这里显示的格式需要切割一下自己可输出看下
+          for (var i = 0; i < arr.length; i++) 
+          {
+            var arr2 = arr[i].split('='); //再次切割
+            //判断查找相对应的值
+            if (arr2[0] == 'policyUserName') 
+            {
+              this.loginForm.username = arr2[1]; //保存到保存数据的地方
+            } else if (arr2[0] == 'policyUserPwd') 
+            {
+              this.loginForm.password = arr2[1];
+            }
+          }
+        }
+      },
+      clearCookie: function() {
+        this.setCookie("", "", -1); //修改2值都为空，天数为负1天就好了
       }
     }
   }

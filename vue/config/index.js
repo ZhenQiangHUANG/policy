@@ -22,9 +22,9 @@ module.exports = {
   },
   dev: {
     env: require('./dev.env'),
-    host: 'localhost',
+    host: '0.0.0.0',
     port: 9520,
-    autoOpenBrowser: true,
+    autoOpenBrowser: true, 
     autoOpenPage: '/login',
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.heeexy.example.dao.StatisticsDao">
+    <!-- 每年所有欢乐谷各类别的政策数量 -->
+    <select id="getGroupByCategoryPolicyNumPie" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            COUNT(1)                                      value,
+            p.category                                    name
+        FROM policy_info p
+        where
+            p.delete_status = '1'
+        <if test="dept!=null"> and p.dept = #{dept}</if>
+        <if test="schedule!=null"> and p.schedule = #{schedule}</if>
+        <if test="collectTime!=null"> and DATE_FORMAT(p.collect_time, '%Y') = #{collectTime}</if>
+        GROUP BY p.category
+    </select>
+
+    <!-- 每年所有类别各欢乐谷的政策数量 -->
+    <select id="getGroupByDeptPolicyNumPie" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            COUNT(1)                                    value,
+            CASE p.dept
+            WHEN '0' THEN '本部'
+            WHEN '1' THEN '深圳'
+            WHEN '2' THEN '北京'
+            WHEN '3' THEN '成都'
+            WHEN '4' THEN '上海'
+            WHEN '5' THEN '武汉'
+            WHEN '6' THEN '天津'
+            WHEN '7' THEN '重庆'
+            WHEN '8' THEN '南京'
+            END                                          AS name
+        FROM policy_info p
+        where
+        p.delete_status = '1'
+        <if test="category!=null"> and p.category = #{category}</if>
+        <if test="schedule!=null"> and p.schedule = #{schedule}</if>
+        <if test="collectTime!=null"> and DATE_FORMAT(p.collect_time, '%Y') = #{collectTime}</if>
+        GROUP BY p.dept
+    </select>
+
+    <!-- 每年所有欢乐谷各类别政策创收金额占比 -->
+    <select id="getGroupByCategoryPolicyRevenuePie" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            SUM(p.revenue)                                value,
+            p.category                                    name
+        FROM policy_info p
+        where
+        p.delete_status = '1'
+        <if test="dept!=null"> and p.dept = #{dept}</if>
+        <if test="schedule!=null"> and p.schedule = #{schedule}</if>
+        <if test="collectTime!=null"> and DATE_FORMAT(p.collect_time, '%Y') = #{collectTime}</if>
+        GROUP BY p.category
+    </select>
+
+    <!-- 每年所有类别各欢乐谷政策创收金额占比 -->
+    <select id="getGroupByDeptPolicyRevenuePie" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+        SUM(p.revenue)                                     value,
+        CASE p.dept
+        WHEN '0' THEN '本部'
+        WHEN '1' THEN '深圳'
+        WHEN '2' THEN '北京'
+        WHEN '3' THEN '成都'
+        WHEN '4' THEN '上海'
+        WHEN '5' THEN '武汉'
+        WHEN '6' THEN '天津'
+        WHEN '7' THEN '重庆'
+        WHEN '8' THEN '南京'
+        END                                          AS name
+        FROM policy_info p
+        where
+        p.delete_status = '1'
+        <if test="category!=null"> and p.category = #{category}</if>
+        <if test="schedule!=null"> and p.schedule = #{schedule}</if>
+        <if test="collectTime!=null"> and DATE_FORMAT(p.collect_time, '%Y') = #{collectTime}</if>
+        GROUP BY p.dept
+    </select>
+
+    <select id="getCountByMonthPolicyNumLine" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            SUM(CASE MONTH(create_date) WHEN '1'  THEN 1 ELSE 0 END) AS  Jan,
+            SUM(CASE MONTH(create_date) WHEN '2'  THEN 1 ELSE 0 END) AS  Feb,
+            SUM(CASE MONTH(create_date) WHEN '3'  THEN 1 ELSE 0 END) AS  Mar,
+            SUM(CASE MONTH(create_date) WHEN '4'  THEN 1 ELSE 0 END) AS  Apr,
+            SUM(CASE MONTH(create_date) WHEN '5'  THEN 1 ELSE 0 END) AS  May,
+            SUM(CASE MONTH(create_date) WHEN '6'  THEN 1 ELSE 0 END) AS  June,
+            SUM(CASE MONTH(create_date) WHEN '7'  THEN 1 ELSE 0 END) AS  July,
+            SUM(CASE MONTH(create_date) WHEN '8'  THEN 1 ELSE 0 END) AS  Aug,
+            SUM(CASE MONTH(create_date) WHEN '9'  THEN 1 ELSE 0 END) AS  Sept,
+            SUM(CASE MONTH(create_date) WHEN '10' THEN 1 ELSE 0 END) AS  OCT,
+            SUM(CASE MONTH(create_date) WHEN '11' THEN 1 ELSE 0 END) AS  Nov,
+            SUM(CASE MONTH(create_date) WHEN '12' THEN 1 ELSE 0 END) AS  Dece,
+            dept                                                         dept
+        FROM policy_info p
+        where
+            p.delete_status = '1'
+        <if test="category!=null"> and p.category = #{category}</if>
+        <if test="schedule!=null"> and p.schedule = #{schedule}</if>
+        <if test="collectTime!=null"> and DATE_FORMAT(p.collect_time, '%Y') = #{collectTime}</if>
+        GROUP BY p.dept
+    </select>
+
+    <select id="getCountByMonthPolicyRevenueLine" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+        SUM(CASE MONTH(create_date) WHEN '1'  THEN revenue ELSE 0 END) AS  Jan,
+        SUM(CASE MONTH(create_date) WHEN '2'  THEN revenue ELSE 0 END) AS  Feb,
+        SUM(CASE MONTH(create_date) WHEN '3'  THEN revenue ELSE 0 END) AS  Mar,
+        SUM(CASE MONTH(create_date) WHEN '4'  THEN revenue ELSE 0 END) AS  Apr,
+        SUM(CASE MONTH(create_date) WHEN '5'  THEN revenue ELSE 0 END) AS  May,
+        SUM(CASE MONTH(create_date) WHEN '6'  THEN revenue ELSE 0 END) AS  June,
+        SUM(CASE MONTH(create_date) WHEN '7'  THEN revenue ELSE 0 END) AS  July,
+        SUM(CASE MONTH(create_date) WHEN '8'  THEN revenue ELSE 0 END) AS  Aug,
+        SUM(CASE MONTH(create_date) WHEN '9'  THEN revenue ELSE 0 END) AS  Sept,
+        SUM(CASE MONTH(create_date) WHEN '10' THEN revenue ELSE 0 END) AS  OCT,
+        SUM(CASE MONTH(create_date) WHEN '11' THEN revenue ELSE 0 END) AS  Nov,
+        SUM(CASE MONTH(create_date) WHEN '12' THEN revenue ELSE 0 END) AS  Dece,
+        dept                                                         dept
+        FROM policy_info p
+        where
+        p.delete_status = '1'
+        <if test="category!=null"> and p.category = #{category}</if>
+        <if test="schedule!=null"> and p.schedule = #{schedule}</if>
+        <if test="collectTime!=null"> and DATE_FORMAT(p.collect_time, '%Y') = #{collectTime}</if>
+        GROUP BY p.dept
+    </select>
+
+    <select id="getCountByYearPolicyNumLine" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT SUM(1) num,YEAR(p.create_date) year, p.dept dept
+        FROM policy_info p
+        WHERE p.delete_status = '1'
+        AND YEAR(p.create_date) &gt;= #{startTime}
+        AND YEAR(p.create_date) &lt;= #{endTime}
+        <if test="category!=null"> and p.category = #{category}</if>
+        <if test="schedule!=null"> and p.schedule = #{schedule}</if>
+        GROUP BY YEAR(p.create_date),p.dept
+    </select>
+
+    <select id="getCountByYearPolicyRevenueLine" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT SUM(p.revenue) revenue,YEAR(p.create_date) year, p.dept dept
+        FROM policy_info p
+        WHERE p.delete_status = '1'
+        AND YEAR(p.create_date) &gt;= #{startTime}
+        AND YEAR(p.create_date) &lt;= #{endTime}
+        <if test="category!=null"> and p.category = #{category}</if>
+        <if test="schedule!=null"> and p.schedule = #{schedule}</if>
+        GROUP BY YEAR(p.create_date),p.dept
+    </select>
+
+</mapper>

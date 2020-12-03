@@ -5,7 +5,7 @@
   "description": "",
   "author": "",
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js --host 0.0.0.0",
     "start": "npm run dev",
     "build": "node build/build.js",
     "build:report": "npm_config_report=true node build/build.js",
@@ -14,13 +14,17 @@
   },
   "dependencies": {
     "axios": "0.18.1",
-    "element-ui": "2.13.0",
+    "echarts": "^4.9.0",
+    "element-ui": "^2.13.0",
+    "file-saver": "^2.0.5",
     "js-cookie": "2.2.0",
     "normalize.css": "7.0.0",
     "nprogress": "0.2.0",
     "vue": "2.6.10",
+    "vue-json-excel": "^0.3.0",
     "vue-router": "3.0.6",
-    "vuex": "3.1.0"
+    "vuex": "3.1.0",
+    "xlsx": "^0.16.9"
   },
   "devDependencies": {
     "autoprefixer": "7.2.3",
@@ -54,6 +58,7 @@
     "postcss-loader": "2.0.9",
     "rimraf": "2.6.2",
     "sass-loader": "6.0.6",
+    "script-loader": "^0.7.2",
     "semver": "5.4.1",
     "shelljs": "0.7.8",
     "svg-sprite-loader": "3.5.2",

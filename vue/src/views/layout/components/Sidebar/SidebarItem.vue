@@ -7,6 +7,7 @@
           <svg-icon v-if="item.children[0].meta&&item.children[0].meta.icon" :icon-class="item.children[0].meta.icon"></svg-icon>
           <span v-if="item.children[0].meta&&item.children[0].meta.title">{{item.children[0].meta.title}}</span>
         </el-menu-item>
+        
       </router-link>
 
       <el-submenu v-else :index="item.name||item.path" :key="item.name">

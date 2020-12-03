@@ -2,10 +2,16 @@ package com.heeexy.example.util;
 
 import com.alibaba.fastjson.JSONObject;
 import com.heeexy.example.config.exception.CommonJsonException;
+import com.heeexy.example.dao.PolicyDao;
+import com.heeexy.example.pojo.PolicyData;
 import com.heeexy.example.util.constants.Constants;
 import com.heeexy.example.util.constants.ErrorEnum;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -15,6 +21,24 @@ import java.util.List;
  * @date: 2017/10/24 10:12
  */
 public class CommonUtil {
+
+	//各个集团首字母缩写
+	private static final String[] CITY = new String[]{"HQ","SZ","BJ","CD","SH","WH","TJ","CQ","NJ"};
+    private static final int CITYSTARTINDEX = 0;
+	private static final int CITYENDINDEX = 8;
+	//政策的类别集合
+	private static final String[] CATEGORY = new String[]{"人力","财税","行业","新基建","安全环保","其他"};
+
+	private static final int LEVELSTARTINDEX = 1;
+	private static final int LEVELENDINDEX = 4;
+
+	//12个月份
+	private static final String[] MONTH = new String[]{"Jan","Feb","Mar","Apr","May","June","July","Aug","Sept","OCT","Nov","Dece"};
+	private static final int MONTHNUM = 12;
+
+	private static final String[] DEPTNAME = new String[]{"本部", "深圳", "北京", "成都", "上海","武汉", "天津", "重庆", "南京"};
+	private static final int DEPTNUM = 9;
+	private static final String LINECHART = "line";
 
 	/**
 	 * 返回一个info为空对象的成功消息的json
@@ -73,6 +97,21 @@ public class CommonUtil {
 		JSONObject result = successJson();
 		JSONObject info = new JSONObject();
 		info.put("list", list);
+		result.put("info", info);
+		return result;
+	}
+
+	/**
+	 * @description:
+	 * @param:  * @param list
+	 * @return: com.alibaba.fastjson.JSONObject
+	 * @author Huangzhenqiang
+	 * @date: 2020/11/18 11:53
+	 */
+	public static JSONObject successPage(JSONObject item) {
+		JSONObject result = successJson();
+		JSONObject info = new JSONObject();
+		info.put("item", item);
 		result.put("info", info);
 		return result;
 	}
@@ -169,11 +208,234 @@ public class CommonUtil {
 		paramObject.remove("pageSize");
 	}
 
+	public static void processGetPolicyParam(final JSONObject paramObject)
+	{
+		//特殊处理：显示全部应用清单，即除本部外所有政策记录
+		String values = paramObject.getString("dept");
+		if( null == values || values.equals(""))
+		{
+			paramObject.remove("dept");
+		}
+		else if(values.equals("9"))
+		{
+			paramObject.remove("dept");
+			paramObject.put("NoDept", "0");
+		}
+		processParamNull(paramObject,"id");
+		processParamNull(paramObject,"policyLevel");
+		processParamNull(paramObject,"minRevenue");
+		processParamNull(paramObject,"maxRevenue");
+		processParamNull(paramObject,"collectTime");
+		processParamNull(paramObject,"policyLevel");
+		processParamNull(paramObject,"category");
+		processParamLike(paramObject,"policyTitle");
+		processParamLike(paramObject,"schedule");
+	}
+
 	/**
 	 * 分页查询之前的处理参数
 	 * 没有传pageRow参数时,默认每页10条.
 	 */
 	public static void fillPageParam(final JSONObject paramObject) {
 		fillPageParam(paramObject, 10);
+	}
+
+	/**
+	 * @description: 判断参数是否为空，为空移除
+	 * @param:  * @param paramObject
+	 * @param key
+	 * @return: void
+	 * @author Huangzhenqiang
+	 * @date: 2020/11/17 15:11
+	 */
+	public static void processParamNull(final JSONObject paramObject,String key)
+	{
+		String values = paramObject.getString(key);
+		if( null == values || values.equals(""))
+		{
+			paramObject.remove(key);
+		}
+	}
+
+	/**
+	 * @description: 判断参数是否为空，为空移除，不为空进行模糊搜索
+	 * @param:  * @param paramObject
+	 * @param key
+	 * @return: void
+	 * @author Huangzhenqiang
+	 * @date: 2020/11/17 15:11
+	 */
+	public static void processParamLike(final JSONObject paramObject,String key)
+	{
+		String values = paramObject.getString(key);
+		if( null == values || values.equals(""))
+		{
+			paramObject.remove(key);
+		}
+		else
+		{
+			paramObject.put(key, "%"+values+"%");
+		}
+	}
+
+	/**
+	 * @description: 生成政策编号
+	 * @param:  * @param dept
+	 * @param policyDao
+	 * @return: java.lang.String
+	 * @author Huangzhenqiang
+	 * @date: 2020/11/17 15:10
+	 */
+	public static String getPolicyId(int dept, PolicyDao policyDao) {
+
+		String city = CITY[dept];
+
+		//获取今天日期
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		String now = sdf.format(new Date());
+
+		int count = getPolicyCount(dept,policyDao);
+		String countStr = String.format("%03d",count);
+
+		String policyId = city+now+countStr;
+		return policyId;
+	}
+
+	/**
+	 * @description: 生成政策编号
+	 * @param:  * @param dept
+ 	* @param count
+ * @param policyDao
+	 * @return: java.lang.String
+	 * @author Huangzhenqiang
+	 * @date: 2020/11/17 15:10
+	 */
+	public static String getPolicyId(int dept, int count, PolicyDao policyDao) {
+
+		String city = CITY[dept];
+
+		//获取今天日期
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		String now = sdf.format(new Date());
+
+		String countStr = String.format("%03d",count);
+
+		String policyId = city+now+countStr;
+		return policyId;
+	}
+
+	/**
+	 * @description: 获取今天当前欢乐谷所发布的政策数量，从而获取编号
+	 * @param:  * @param dept
+	 * @param policyDao
+	 * @return: int
+	 * @author Huangzhenqiang
+	 * @date: 2020/11/17 15:10
+	 */
+	public static int getPolicyCount(int dept, PolicyDao policyDao) {
+		//获取今天日期
+		SimpleDateFormat sdfCheck = new SimpleDateFormat("yyyy-MM-dd");
+		String nowCheck = sdfCheck.format(new Date());
+
+		int count = policyDao.countPolicyCityToday(dept,nowCheck) + 1;
+
+		return count;
+	}
+
+	/**
+	 * @description: 将后端查询到的数据封装成数组
+	 * @param:  * @param jsonObject
+	 * @return: int[]
+	 * @author Huangzhenqiang
+	 * @date: 2020/11/17 15:09
+	 */
+	public static BigDecimal[] getReleaseNumEachMonth(final JSONObject jsonObject)
+	{
+		BigDecimal[] res = new BigDecimal[MONTHNUM];
+		for(int i = 0; i < MONTHNUM; i++)
+		{
+			res[i] = jsonObject.getBigDecimal(MONTH[i]);
+		}
+		return res;
+	}
+
+	/**
+	 * @description: 将后端查询到的数据封装成折线图所需要的数据格式
+	 * @param:  * @param null
+	 * @return:
+	 * @author Huangzhenqiang
+	 * @date: 2020/11/17 15:02
+	 */
+	public static List<JSONObject> getLineChartMonthData(List<JSONObject> list,String stack)
+	{
+		List<JSONObject> result = new ArrayList<>();
+		int index = 0;
+		for(int i = 0; i < DEPTNUM ; i++)
+		{
+			JSONObject cur = new JSONObject();
+			cur.put("name",DEPTNAME[i]);
+			cur.put("type",LINECHART);
+			cur.put("stack",stack);
+			if(index < list.size() && list.get(index).getIntValue("dept") == i )
+			{
+				cur.put("data",CommonUtil.getReleaseNumEachMonth(list.get(index)));
+				index++;
+			}
+			else
+			{
+				cur.put("data",new int[12]);
+			}
+			result.add(cur);
+		}
+		return result;
+	}
+
+	public static List<JSONObject> getLineChartYearData(JSONObject requestJson,List<JSONObject> list,String stack,String type)
+	{
+		List<JSONObject> result = new ArrayList<>();
+		int startTime = requestJson.getIntValue("startTime");
+		int endTime = requestJson.getIntValue("endTime");
+		int subTime = endTime-startTime+1;
+		BigDecimal[][] allRevenue = new BigDecimal[DEPTNUM][subTime];
+		for(int i = 0; i < DEPTNUM ; i++)
+		{
+			JSONObject cur = new JSONObject();
+			cur.put("name",DEPTNAME[i]);
+			cur.put("type",LINECHART);
+			cur.put("stack",stack);
+			result.add(cur);
+			for(int j = 0; j < subTime; j++)
+			{
+				allRevenue[i][j] = new BigDecimal(0);
+			}
+		}
+		for(int i = 0; i < list.size(); i++)
+		{
+			JSONObject cur = list.get(i);
+			int curDept = cur.getIntValue("dept");
+			int curYear = cur.getIntValue("year");
+			BigDecimal curType = cur.getBigDecimal(type);
+			allRevenue[curDept][curYear-startTime] = curType;
+		}
+		for(int i = 0; i < DEPTNUM ; i++)
+		{
+			result.get(i).put("data",allRevenue[i]);
+		}
+		return result;
+	}
+
+	/** 
+	 * @description: 对批量添加的政策记录的4个属性：dept level assist RevenueWay进行检测，查看该属性是否符合输入要求：
+	 * @param:  * @param policy 
+	 * @return: boolean 
+	 * @author Huangzhenqiang
+	 * @date: 2020/12/1 15:39
+	 */
+	public static boolean CheckedPolicyParams(PolicyData policy) {
+		if(policy.getDept() == -1 || policy.getPolicyLevel() == -1 || policy.getAssist() == -1 || policy.getRevenueWay() == -1)
+		{
+			return false;
+		}
+		return true;
 	}
 }

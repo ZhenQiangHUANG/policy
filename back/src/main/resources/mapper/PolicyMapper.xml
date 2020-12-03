@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.heeexy.example.dao.PolicyDao">
+
+    <select id="countPolicy" resultType="Integer">
+        SELECT count(0)
+        FROM policy_info p
+        where p.delete_status = '1'
+        <if test="id!=null"> and p.id = #{id}</if>
+        <if test="dept!=null"> and p.dept = #{dept}</if>
+        <if test="NoDept!=null"> and p.dept != #{NoDept}</if>
+        <if test="category!=null"> and p.category = #{category}</if>
+        <if test="policyLevel!=null"> and p.policy_level = #{policyLevel}</if>
+        <if test="minRevenue!=null"> and p.revenue >= #{minRevenue}</if>
+        <if test="maxRevenue!=null"> and  #{maxRevenue} >= p.revenue</if>
+        <if test="collectTime!=null"> and DATE_FORMAT(p.collect_time, '%Y') = #{collectTime}</if>
+        <if test="policyTitle!=null"> and p.policy_title like #{policyTitle}</if>
+        <if test="schedule!=null"> and p.schedule like #{schedule}</if>
+    </select>
+
+    <select id="listPolicy" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            p.id                                      id,
+            p.policy_id                               policyId,
+            p.dept                                    dept,
+            p.policy_title                            policyTitle,
+            p.policy_url                              policyUrl,
+            p.category                                category,
+            p.policy_level                            policyLevel,
+            CONVERT (p.policy_resume USING utf8)      policyResume,
+            p.release_channel                         releaseChannel,
+            p.government_branch                       governmentBranch,
+            p.release_time                            releaseTime,
+            p.collect_time                            collectTime,
+            p.collector                               collector,
+            p.revenue_way                             revenueWay,
+            p.revenue                                 revenue,
+            p.assist                                  assist,
+            p.department                              department,
+            p.acceptor                                acceptor,
+            p.acceptor_phone                          acceptorPhone,
+            p.schedule                                schedule,
+            p.creator                                 creator,
+            DATE_FORMAT(p.create_date, '%Y.%m.%d %T') createDate,
+            p.modifier                                MODIFIER,
+            DATE_FORMAT(p.modify_date, '%Y.%m.%d %T') modifyDate
+        FROM policy_info p
+        where p.delete_status = '1'
+        <if test="id!=null"> and p.id = #{id}</if>
+        <if test="dept!=null"> and p.dept = #{dept}</if>
+        <if test="NoDept!=null"> and p.dept != #{NoDept}</if>
+        <if test="category!=null"> and p.category = #{category}</if>
+        <if test="policyLevel!=null"> and p.policy_level = #{policyLevel}</if>
+        <if test="minRevenue!=null"> and p.revenue >= #{minRevenue}</if>
+        <if test="maxRevenue!=null"> and  #{maxRevenue} >= p.revenue</if>
+        <if test="collectTime!=null"> and DATE_FORMAT(p.collect_time, '%Y') = #{collectTime}</if>
+        <if test="policyTitle!=null"> and p.policy_title like #{policyTitle}</if>
+        <if test="schedule!=null"> and p.schedule like #{schedule}</if>
+        ORDER BY p.dept , p.id desc
+        LIMIT #{offSet}, #{pageRow}
+    </select>
+
+    <select id="listPolicyConditionById" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            c.id                                      id,
+            c.policy_id                               policyId,
+            CONVERT (c.condition USING utf8)          conditions
+        FROM policy_conditions c
+        where
+            c.policy_id = #{policyId}
+        AND
+            c.delete_status = '1'
+    </select>
+
+    <select id="listPolicyMeasureById" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            m.id                                      id,
+            m.policy_id                               policyId,
+            CONVERT (m.measure USING utf8)            measure
+        FROM policy_measures m
+        where
+            m.policy_id = #{policyId}
+        AND
+            m.delete_status = '1'
+    </select>
+
+    <select id="listPolicyAnnotationById" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            a.id                                      id,
+            a.policy_id                               policyId,
+            CONVERT (a.annotation USING utf8)         annotation
+        FROM policy_annotations a
+        where
+            a.policy_id = #{policyId}
+        AND
+            a.delete_status = '1'
+    </select>
+
+    <select id="countPolicyCityToday" resultType="Integer">
+        SELECT count(0)
+        FROM policy_info p
+        where
+             p.dept = #{city}
+        AND
+            date_format(p.create_date,'%Y-%m-%d')= #{now}
+    </select>
+
+    <insert id="addPolicyBase" parameterType="com.alibaba.fastjson.JSONObject">
+        INSERT INTO policy_info
+            (
+              `policy_title`,`policy_url`,`policy_id`,`category`,`policy_level`,`policy_resume`,
+              `release_channel`,`government_branch`,`release_time`,`collect_time`,`collector`,
+              `revenue_way`,`revenue`,`assist`,`department`,`acceptor`,`schedule`,`creator`,
+              `create_date`,`modifier`,`modify_date`,`dept`,`delete_status`,`acceptor_phone`
+            )
+        VALUES
+            (
+              #{policyTitle},#{policyUrl},#{policyId},#{category},#{policyLevel},#{policyResume},
+              #{releaseChannel},#{governmentBranch},#{releaseTime},#{collectTime},#{collector},
+              #{revenueWay}, #{revenue},#{assist},#{department},#{acceptor},#{schedule},#{creator},
+              now(),#{creator},now(),#{dept},'1',#{acceptorPhone}
+            )
+    </insert>
+
+    <insert id="addPolicyList" parameterType="list" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO policy_info
+            (
+              `policy_title`,`policy_url`,`policy_id`,`category`,`policy_level`,`policy_resume`,
+              `release_channel`,`government_branch`,`release_time`,`collect_time`,`collector`,
+              `revenue_way`,`revenue`,`assist`,`department`,`acceptor`,`schedule`,`creator`,
+              `create_date`,`modifier`,`modify_date`,`dept`,`delete_status`,`acceptor_phone`
+            )
+        VALUES
+            <foreach collection="list" item="p" separator=",">
+                (
+                  #{p.policyTitle},#{p.policyUrl},#{p.policyId},#{p.category},#{p.policyLevel},#{p.policyResume},
+                  #{p.releaseChannel},#{p.governmentBranch},#{p.releaseTime},#{p.collectTime},#{p.collector},
+                  #{p.revenueWay}, #{p.revenue},#{p.assist},#{p.department},#{p.acceptor},#{p.schedule},#{p.creator},
+                  now(),#{p.creator},now(),#{p.dept},'1',#{p.accpetorPhone}
+                )
+            </foreach>
+    </insert>
+
+    <update id="updatePolicyBase" parameterType="com.alibaba.fastjson.JSONObject">
+        UPDATE policy_info
+        SET
+          `policy_title` = #{policyTitle},
+          `policy_url` = #{policyUrl},
+          `policy_id` = #{policyId},
+          `category` = #{category},
+          `policy_level` = #{policyLevel},
+          `policy_resume` = #{policyResume},
+          `release_channel` = #{releaseChannel},
+          `government_branch` = #{governmentBranch},
+          `release_time` = #{releaseTime},
+          `collect_time` = #{collectTime},
+          `collector` = #{collector},
+          `revenue_way` = #{revenueWay},
+          `revenue` = #{revenue},
+          `assist` = #{assist},
+          `department` = #{department},
+          `acceptor` = #{acceptor},
+          `acceptor_phone` = #{accpetorPhone},
+          `schedule` = #{schedule},
+          `modifier` = #{modifier},
+          `modify_date` = now()
+        WHERE `id` = #{id};
+    </update>
+
+    <insert id="addPolicyCondition" parameterType="com.alibaba.fastjson.JSONObject">
+        INSERT INTO `policy_conditions`
+            (
+                `policy_id`,`condition`,`creator`,`create_date`,`modifier`,`modify_date`,`delete_status`
+            )
+        VALUES
+            (
+                #{policyId},
+                #{condition},
+                #{creator},
+                now(),
+                #{creator},
+                now(),
+                '1'
+            );
+    </insert>
+
+    <insert id="addPolicyConditionList"  parameterType="list">
+        INSERT INTO `policy_conditions`
+            (
+                `policy_id`,`condition`,`creator`,`create_date`,`modifier`,`modify_date`,`delete_status`
+            )
+        VALUES
+            <foreach collection="list" item="c" separator=",">
+                (
+                    #{c.policyId},
+                    #{c.condition},
+                    #{c.creator},
+                    now(),
+                    #{c.creator},
+                    now(),
+                    '1'
+                )
+            </foreach>
+    </insert>
+
+    <update id="updatePolicyCondition" parameterType="com.alibaba.fastjson.JSONObject">
+        UPDATE policy_conditions
+        SET
+          `condition` = #{conditions},
+          `modifier` = #{modifier},
+          `modify_date` = now()
+        WHERE `id` = #{id};
+    </update>
+
+    <insert id="addPolicyMeasure" parameterType="com.alibaba.fastjson.JSONObject">
+        INSERT INTO `policy_measures`
+            (
+                `policy_id`,`measure`,`creator`,`create_date`,`modifier`,`modify_date`,`delete_status`
+            )
+        VALUES
+            (
+                #{policyId},
+                #{measure},
+                #{creator},
+                now(),
+                #{creator},
+                now(),
+                '1'
+            );
+    </insert>
+
+    <insert id="addPolicyMeasureList" parameterType="list">
+        INSERT INTO `policy_measures`
+            (
+                `policy_id`,`measure`,`creator`,`create_date`,`modifier`,`modify_date`,`delete_status`
+            )
+        VALUES
+            <foreach collection="list" item="m" separator=",">
+                (
+                    #{m.policyId},
+                    #{m.measure},
+                    #{m.creator},
+                    now(),
+                    #{m.creator},
+                    now(),
+                    '1'
+                )
+            </foreach>
+    </insert>
+
+    <update id="updatePolicyMeasure" parameterType="com.alibaba.fastjson.JSONObject">
+        UPDATE policy_measures
+        SET
+          `measure` = #{measure},
+          `modifier` = #{modifier},
+          `modify_date` = now()
+        WHERE `id` = #{id};
+    </update>
+    
+    <update id="deletePolicyCondition" parameterType="com.alibaba.fastjson.JSONObject">
+        UPDATE policy_conditions
+        SET
+          `delete_status` = '2'
+        WHERE `id` = #{deleteId};
+    </update>
+
+    <update id="deletePolicyMeasure" parameterType="com.alibaba.fastjson.JSONObject">
+        UPDATE policy_measures
+        SET
+          `delete_status` = '2'
+        WHERE `id` = #{deleteId};
+    </update>
+
+
+    <insert id="addPolicyAnnotation" parameterType="com.alibaba.fastjson.JSONObject">
+        INSERT INTO `policy_annotations`
+            (
+                `policy_id`,`annotation`,`creator`,`create_date`,`modifier`,`modify_date`,`delete_status`
+            )
+        VALUES
+            (
+                #{policyId},
+                #{annotation},
+                #{creator},
+                now(),
+                #{creator},
+                now(),
+                '1'
+            );
+    </insert>
+
+    <update id="updatePolicyAnnotation" parameterType="com.alibaba.fastjson.JSONObject">
+        UPDATE policy_annotations
+        SET
+          `annotation` = #{annotation},
+          `modifier` = #{modifier},
+          `modify_date` = now()
+
+        WHERE `id` = #{id};
+    </update>
+
+    <update id="deletePolicyConditionByPolicyId" parameterType="com.alibaba.fastjson.JSONObject">
+        UPDATE policy_conditions
+        SET
+          `delete_status` = '2'
+        WHERE `policy_id` = #{id};
+    </update>
+
+    <update id="deletePolicyMeasureByPolicyId" parameterType="com.alibaba.fastjson.JSONObject">
+        UPDATE policy_measures
+        SET
+          `delete_status` = '2'
+        WHERE `policy_id` = #{id};
+    </update>
+
+    <update id="deletePolicyAnnotationByPolicyId" parameterType="com.alibaba.fastjson.JSONObject">
+        UPDATE policy_annotations
+        SET
+          `delete_status` = '2'
+        WHERE `policy_id` = #{id};
+    </update>
+
+    <update id="deletePolicy" parameterType="com.alibaba.fastjson.JSONObject">
+        UPDATE policy_info
+        SET
+          `delete_status` = '2'
+        WHERE `id` = #{id};
+    </update>
+
+    <select id="exportPolicy" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            P.id                                      id,
+            p.dept                                    dept,
+            p.policy_id                               policyId,
+            p.policy_title                            policyTitle,
+            p.policy_url                              policyUrl,
+            p.category                                category,
+            p.policy_level                            policyLevel,
+            CONVERT (p.policy_resume USING utf8)      policyResume,
+            p.release_channel                         releaseChannel,
+            p.government_branch                       governmentBranch,
+            p.release_time                            releaseTime,
+            p.collect_time                            collectTime,
+            p.collector                               collector,
+            p.revenue_way                             revenueWay,
+            p.revenue                                 revenue,
+            p.assist                                  assist,
+            p.department                              department,
+            p.acceptor                                acceptor,
+            p.acceptor_phone                          acceptorPhone,
+            p.schedule                                schedule,
+            CONVERT (a.annotation USING utf8)         annotation
+        FROM policy_info p
+        LEFT JOIN policy_annotations a
+        ON p.id =  a.policy_id
+        AND a.delete_status = '1'
+        where
+            p.delete_status = '1'
+        <if test="dept!=null"> and p.dept = #{dept}</if>
+        <if test="policyLevel!=null"> and p.policy_level = #{policyLevel}</if>
+        <if test="minRevenue!=null"> and p.revenue >= #{minRevenue}</if>
+        <if test="maxRevenue!=null"> and  #{maxRevenue} >= p.revenue</if>
+        <if test="collectTime!=null"> and DATE_FORMAT(p.collect_time, '%Y') = #{collectTime}</if>
+        <if test="policyTitle!=null"> and p.policy_title like #{policyTitle}</if>
+        <if test="schedule!=null"> and p.schedule like #{schedule}</if>
+        <if test="ids!=null"> and p.id in ${ids}</if>
+        ORDER BY p.dept , p.id desc
+    </select>
+
+    <select id="exportPolicyCondition" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            c.policy_id                               policyId,
+            CONVERT (c.condition USING utf8)          conditions
+        FROM policy_conditions c
+        where
+            c.delete_status = '1'
+        <if test="policyIds!=null"> and c.policy_id in ${policyIds}</if>
+        ORDER BY c.policy_id
+    </select>
+
+    <select id="exportPolicyMeasure" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            m.policy_id                               policyId,
+            CONVERT (m.measure USING utf8)            measure
+        FROM policy_measures m
+        where
+            m.delete_status = '1'
+        <if test="policyIds!=null"> and m.policy_id in ${policyIds}</if>
+        ORDER BY m.policy_id
+    </select>
+
+    <select id="getNewAnnotationsNum" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            count(1)                                   newAnnotationsNum
+        FROM policy_annotations a
+        where
+            a.delete_status = '1'
+        and a.modify_date > #{lastViewTime}
+    </select>
+
+    <select id="getAnnotationTableData" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            P.id                                      id,
+            p.policy_title                            policyTitle,
+            CONVERT (a.annotation USING utf8)         annotation,
+            a.modifier                                modifier,
+            date_format(a.modify_date,'%Y-%m-%d')     modify_date
+        FROM policy_info p , policy_annotations a
+        WHERE
+            p.id =  a.policy_id
+        AND
+            p.delete_status = '1'
+        AND
+            a.delete_status = '1'
+        ORDER by a.modify_date desc
+        LIMIT #{offSet}, #{pageRow}
+    </select>
+
+</mapper>
